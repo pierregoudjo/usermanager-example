@@ -209,14 +209,14 @@
   (alter-var-root #'system component/stop)
 
   See the Rich Comment Form below."
-  ([port] (new-system port true))
-  ([port repl]
+  ([port database] (new-system port database true))
+  ([port database repl]
    (component/system-map :application (my-application {:repl repl})
-                         :database    (model/setup-database)
+                         :database    (model/setup-database database)
                          :web-server  (web-server #'my-handler port))))
 
 (comment
-  (def system (new-system 8888))
+  (def system (new-system "db" 8888))
   (alter-var-root #'system component/start)
   (alter-var-root #'system component/stop)
   ;; the comma here just "anchors" the closing paren on this line,
@@ -247,12 +247,13 @@
   (atom nil))
 
 (defn -main
-  [& [port]]
+  [& [port database]]
   (let [port (or port (get (System/getenv) "PORT" 8080))
-        port (cond-> port (string? port) Integer/parseInt)]
+        port (cond-> port (string? port) Integer/parseInt)
+        database (or database (get (System/getenv) "DATABASE_PATH" "usermanager_db"))]
     (println "Starting up on port" port)
     ;; start the web server and application:
-    (-> (component/start (new-system port false))
+    (-> (component/start (new-system port database false))
         ;; then put it into the atom so we can get at it from a REPL
         ;; connected to this application:
         (->> (reset! repl-system))

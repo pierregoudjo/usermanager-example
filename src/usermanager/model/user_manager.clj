@@ -8,12 +8,6 @@
             [next.jdbc :as jdbc]
             [next.jdbc.sql :as sql]))
 
-;; our database connection and initial data
-
-(def ^:private my-db
-  "SQLite database connection spec."
-  {:dbtype "sqlite" :dbname "usermanager_db"})
-
 (def ^:private departments
   "List of departments."
   ["Accounting" "Sales" "Support" "Development"])
@@ -88,7 +82,8 @@ create table addressbook (
   clojure.lang.IFn
   (invoke [_] datasource))
 
-(defn setup-database [] (map->Database {:db-spec my-db}))
+(defn setup-database 
+  ([database] (map->Database {:db-spec {:dbtype "sqlite" :dbname database }})))
 
 ;; data model access functions
 
